@@ -1,0 +1,18 @@
+# Ignore Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Ignore server folder
+server/
+dev/
+
+# Ignore artifacts folder
+.artifacts/
+
+#
+evaluation-keys.db
+core
+context.bin
+model.bin
+

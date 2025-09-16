@@ -1,0 +1,14 @@
+{
+  "include": ["."],
+  "exclude": ["**/__pycache__"],
+  "reportMissingImports": true,
+  "reportMissingModuleSource": true,
+  "reportImportCycles": true,
+  "pythonVersion": "3.11",
+  "executionEnvironments": [
+    {
+      "root": ".",
+      "extraPaths": ["."]
+    }
+  ]
+}
