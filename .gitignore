@@ -15,4 +15,4 @@ evaluation-keys.db
 core
 context.bin
 model.bin
-
+*.log
