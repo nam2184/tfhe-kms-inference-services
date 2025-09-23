@@ -11,12 +11,12 @@ class KeyModel(SQLModel, table=True):
 class ClientHEModel(SQLModel, table=True):
     id: int = Field(default=None, primary_key=True)
     file: str
-    chat_id: int
+    chat_id: int = Field(unique=True) 
 
 class HomomorphicKeyModel(SQLModel, table=True):
     id: int = Field(default=None, primary_key=True)
     file: str
-    chat_id: int
+    chat_id: int = Field(unique=True) 
 
 class DBService:
     def __init__(self, db_path: str = "sqlite:///keys.db"):
