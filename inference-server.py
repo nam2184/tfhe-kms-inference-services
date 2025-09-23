@@ -7,7 +7,7 @@ from concrete.fhe.compilation.configuration import np
 from flask import Flask, request, jsonify
 import os
 from sqlmodel import Session
-from db import DBService, HomomorphicKeyModel, KeyModel
+from db_server import HomomorphicDBService, HomomorphicKeyModel 
 from models import EncryptedBodyMessageSchema, EncryptedMessageSchema, ErrorTypeSchema, PostKeySchema, PostKeyBodySchema
 import util
 from flask_smorest import Api, Blueprint
@@ -96,7 +96,7 @@ class Key(MethodView):
             file=encoded_file,
             chat_id=data["chat_id"]
         )
-        key = DBService().insert_homomorphic_key(key_record)
+        key = HomomorphicDBService().insert_homomorphic_key(key_record)
         return key   
 
 @cross_origin(supports_credentials=True) 
@@ -106,7 +106,7 @@ class KeyCheck(MethodView):
     @blp.response(200, PostKeySchema)
     @blp.alt_response(status_code=400, schema=ErrorTypeSchema)
     def get(self, chat_id):
-        key = DBService().get_homomorphic_key_by_chat_id(chat_id)
+        key = HomomorphicDBService().get_homomorphic_key_by_chat_id(chat_id)
         if not key:
             return jsonify({'status': 'error', 'message': "No key found"}), 400
         return key
@@ -122,7 +122,7 @@ class Predict(MethodView):
     def post(self, data):
         # --- Fetch key from DB ---
         try :
-            key = DBService().get_homomorphic_key_by_chat_id(data["chat_id"])
+            key = HomomorphicDBService().get_homomorphic_key_by_chat_id(data["chat_id"])
             if key is not None :
                 serialized_evaluation_keys = base64.b64decode(key.file)
                 image_to_classify = base64.b64decode(data["image_to_classify"])
