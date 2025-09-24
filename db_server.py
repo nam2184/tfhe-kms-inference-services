@@ -1,5 +1,6 @@
 # db_homomorphic.py
-from sqlmodel import SQLModel, create_engine, Session, select
+from sqlmodel import SQLModel, Field,create_engine, Session, select
+
 
 class HomomorphicKeyModel(SQLModel, table=True):
     id: int = Field(default=None, primary_key=True)
