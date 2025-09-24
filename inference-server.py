@@ -161,6 +161,6 @@ if __name__ == '__main__':
     HomomorphicDBService()    
     log_file_path = os.path.join(network.log_dir.name, "server.log")
     util.setup_logging(log_file_path, 'werkzeug')
-    generate_server_configs_local(network)
+    generate_server_configs(network)
     run_flask_app(app, 5001)
 

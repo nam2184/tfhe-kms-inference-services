@@ -7,7 +7,7 @@ headers = {
 }
 
 LOCAL_SERVER_ENDPOINT = "http://127.0.0.1:5000"
-REMOTE_SERVER_ENDPOINT = "https://kms.netty"
+REMOTE_SERVER_ENDPOINT = "https://khanhmychattykms.win"
 
 # Define the cookies to be sent (like session or auth tokens)
 cookies = {
