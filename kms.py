@@ -225,17 +225,22 @@ class Model(MethodView):
     )
     @blp.alt_response(status_code=400, schema=ErrorTypeSchema)
     def get(self):
-        file_path = os.path.join(network.dev_dir.name, 'server.zip')
-        if os.path.exists(file_path):
-            return send_file(
-                    file_path,
-                    mimetype='application/zip',
-                    as_attachment=True,
-                    download_name='server.zip'
-                    )
-        else:
-            print(f"File not found at path: {file_path}")
-            return
+        try :
+            file_path = os.path.join(network.dev_dir.name, 'server.zip')
+            if os.path.exists(file_path):
+                return send_file(
+                        file_path,
+                        mimetype='application/zip',
+                        as_attachment=True,
+                        download_name='server.zip'
+                        )
+            else:
+                error = {"section" : "model", "message" : "File not found"}
+                return error
+        except Exception as e:
+            error = {"section" : "model", "message" : str(e)}
+            return error
+         
 
 # --- Register endpoints ---
 api.register_blueprint(blp)
