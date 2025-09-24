@@ -55,7 +55,7 @@ def generate_server_configs_local(network : Network):
             for chunk in response.iter_content(chunk_size=8192):
                 f.write(chunk)
     else:
-        print("Download failed:", response.status_code)
+        print("Download failed:", response.status_code, response.json())
     time.sleep(10)
 
 def generate_server_configs(network : Network):
