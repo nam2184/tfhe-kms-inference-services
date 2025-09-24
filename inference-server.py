@@ -158,7 +158,7 @@ def run_flask_app(app, port):
 
 if __name__ == '__main__':
     save_openapi_spec(app)
-    
+    HomomorphicDBService()    
     log_file_path = os.path.join(network.log_dir.name, "server.log")
     util.setup_logging(log_file_path, 'werkzeug')
     generate_server_configs_local(network)

@@ -276,5 +276,6 @@ if __name__ == '__main__':
     setup_he_module()    
     log_file_path = os.path.join(network.dev_dir.name, "dev.log")
     util.setup_logging(log_file_path, 'werkzeug')
+    KeysDBService()
     p1 = Process(target=run_flask_app, args=(app, 5000))
     p1.start()  
