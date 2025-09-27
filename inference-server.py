@@ -92,6 +92,10 @@ class Key(MethodView):
         except Exception:
             return jsonify({'status': 'error', 'message': "Invalid base64"}), 400
         
+        key = HomomorphicDBService().get_homomorphic_key_by_chat_id(data["chat_id"])
+        if key is not None :
+            return key
+
         key_record = HomomorphicKeyModel(
             file=encoded_file,
             chat_id=data["chat_id"]

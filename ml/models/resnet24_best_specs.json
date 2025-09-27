@@ -1,0 +1,12 @@
+{
+  "n_classes": 2,
+  "input_shape": [
+    3,
+    24,
+    24
+  ],
+  "epochs_trained": 7,
+  "batch_size": 32,
+  "learning_rate": 0.001,
+  "best_val_acc": 0.8291071428571428
+}

@@ -156,7 +156,7 @@ def split_dataset_xy(base_path, train_ratio=0.8, seed=42, sample=False):
         if not os.path.isdir(class_path):
             continue
 
-        label = 0 if class_name.lower() == "neutral" else 1
+        label = 0 if class_name.lower() == "neutral" or class_name.lower() == "drawing" else 1
         images = [os.path.join(class_path, f) 
                   for f in os.listdir(class_path) 
                   if f.lower().endswith((".jpg", ".png"))]
@@ -172,6 +172,39 @@ def split_dataset_xy(base_path, train_ratio=0.8, seed=42, sample=False):
 
     return x_train, y_train, x_val, y_val
 
+def make_small_dataset(base_path, n_samples=1000, seed=42):
+    random.seed(seed)
+    x_train, y_train = [], []
+
+    all_images = []
+    all_labels = []
+
+    # Collect all images with their labels
+    for class_name in os.listdir(base_path):
+        class_path = os.path.join(base_path, class_name)
+        if not os.path.isdir(class_path):
+            continue
+
+        # Label rule: 0 for "neutral"/"drawing", 1 for everything else
+        label = 0 if class_name.lower() in ["neutral", "drawing"] else 1
+        images = [
+            os.path.join(class_path, f)
+            for f in os.listdir(class_path)
+            if f.lower().endswith((".jpg", ".png"))
+        ]
+
+        all_images.extend(images)
+        all_labels.extend([label] * len(images))
+
+    # Shuffle and sample
+    combined = list(zip(all_images, all_labels))
+    random.shuffle(combined)
+    sampled = combined[:n_samples]
+
+    # Unzip back into x_train and y_train
+    x_train, y_train = zip(*sampled)
+
+    return list(x_train), list(y_train)
 
 def preprocess_images(image_paths, size=(8, 8)):
     processed = []
@@ -185,6 +218,16 @@ def preprocess_images(image_paths, size=(8, 8)):
     return np.array(processed)                           # shape (N, H, W, 1)
 
 
+def preprocess_images_color(image_paths, size=(8, 8)):
+    processed = []
+    for path in image_paths:
+        img = Image.open(path)                           # keep original color
+        img_resized = img.resize(size, Image.LANCZOS)
+        arr = np.array(img_resized, dtype=np.float32)    # shape (H, W, C)
+        arr = arr / 255.0                                # normalize to [0,1]
+        processed.append(arr)
+    return np.array(processed) 
+
 def split_and_preprocess(base_path, train_ratio=0.8, seed=42, size=(8, 8)):
     """
     Splits the dataset and preprocesses both x_train and x_val automatically.
@@ -196,13 +239,13 @@ def split_and_preprocess(base_path, train_ratio=0.8, seed=42, size=(8, 8)):
         y_val (np.ndarray): shape (M,)
     """
     x_train_paths, y_train, x_val_paths, y_val = split_dataset_xy(base_path, train_ratio, seed)
-    x_train = preprocess_images(x_train_paths, size)
-    x_val = preprocess_images(x_val_paths, size)
+    x_train = preprocess_images_color(x_train_paths, size)
+    x_val = preprocess_images_color(x_val_paths, size)
     print("x_train shape:", x_train.shape)
     print("x_val shape:", x_val.shape)
     return x_train, np.array(y_train), x_val, np.array(y_val)
 
-def split_and_preprocess_placeholder(base_path, train_ratio=0.8, seed=42, size=(8, 8)):
+def split_and_preprocess_calibration(base_path, n_samples=100, seed=42, size=(8, 8)):
     """
     Splits the dataset and preprocesses both x_train and x_val automatically.
 
@@ -212,10 +255,8 @@ def split_and_preprocess_placeholder(base_path, train_ratio=0.8, seed=42, size=(
         x_val (np.ndarray): shape (M, H, W, 1)
         y_val (np.ndarray): shape (M,)
     """
-    x_train_paths, y_train, x_val_paths, y_val = split_dataset_xy(base_path, train_ratio, seed, True)
-    x_train = preprocess_images(x_train_paths, size)
-    x_val = preprocess_images(x_val_paths, size)
-    print("x_train shape:", x_train.shape)
-    print("x_val shape:", x_val.shape)
-    return x_train, np.array(y_train), x_val, np.array(y_val)
+    calibration_data, calibration_y = make_small_dataset(base_path=base_path, n_samples=n_samples, seed=seed)
+    calibration_data = preprocess_images_color(calibration_data, size)
+    print("calibration data shape:", calibration_data)
+    return calibration_data
 

@@ -10,13 +10,13 @@ from werkzeug.wrappers import response
 from db_kms import KeysDBService, KeyModel, ClientHEModel
 import util
 from network import Network
-from concrete.ml.torch.compile import compile_brevitas_qat_model, tempfile, torch
+from concrete.ml.torch.compile import compile_brevitas_qat_model, compile_torch_model, tempfile, torch
 from dotenv import load_dotenv
 from flask_cors import CORS, cross_origin
 from flask_smorest import Api, Blueprint
 from flask_smorest.blueprint import MethodView
 from models import  ErrorTypeSchema, GetClientSchema
-from ml import ml, data
+from ml import resnet, data
 import numpy as np
 from Crypto.Random import get_random_bytes
 import zipfile
@@ -258,22 +258,16 @@ def run_flask_app(app, port):
 
 def setup_he_module():
     global q_module
-    image_size = 15
-    net = ml.CNN(2, 1, image_size)
-    dummy_input = torch.randn(1, 1, image_size, image_size)  # (N, C, H, W) 
-    net(dummy_input)
-    cwd = os.getcwd()
-    x_train, x_test, y_train, y_test = data.split_and_preprocess_placeholder(cwd + "/dataset", size = (image_size, image_size)) 
-    x_train = np.transpose(x_train, (0, 3, 1, 2))
-    checkpoint = torch.load(cwd + f'/ml/models/cnn{image_size}_best.pth')
-    #print(checkpoint)
-    #for key in list(checkpoint.keys()):
-     #   if 'model.' in key:
-      #      checkpoint[key.replace('model.', '')] = checkpoint[key]
-       #     del checkpoint[key]
+    image_size = 48
+    net = resnet.LiteResNet(n_classes=2, in_channels=3)
+
+    project_root = os.path.dirname(os.getcwd())
+    calibration_data = data.split_and_preprocess_calibration(project_root + "/dataset", n_samples = 100, size = (image_size, image_size)) 
+    calibration_data = np.transpose(calibration_data, (0, 3, 1, 2))
+    checkpoint = torch.load(os.getcwd() + f'/ml/models/resnet{image_size}_best.pth')
     net.load_state_dict(checkpoint)
     print("Compiling model for deployment")
-    q_module = compile_brevitas_qat_model(net, x_train, rounding_threshold_bits=4, p_error=0.01)        
+    q_module = compile_brevitas_qat_model(net, calibration_data, rounding_threshold_bits=4, p_error=0.01)        
 
 
 if __name__ == '__main__':
