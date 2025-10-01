@@ -111,7 +111,8 @@ class Client(MethodView):
             client_keys_dir = os.path.join(base_dir, f"keys{chat_id}.bin")
             
             client = FHEModelClient(base_dir)
-            client.generate_private_and_evaluation_keys(True)
+            client.generate_private_and_evaluation_keys()
+            print("[INFO] Generated private and evaluation keys")
             client.client.keys.save(client_keys_dir)
             print("[INFO] Re-created FHEModelClient for fresh keys")
             print(f"[INFO] Using client_dir={client_keys_dir}")
