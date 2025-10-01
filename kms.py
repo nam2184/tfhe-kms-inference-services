@@ -261,8 +261,8 @@ def setup_he_module():
     image_size = 48
     net = resnet.LiteResNet(n_classes=2, in_channels=3)
 
-    project_root = os.path.dirname(os.getcwd())
-    calibration_data = data.split_and_preprocess_calibration(project_root + "/dataset", n_samples = 100, size = (image_size, image_size)) 
+    #project_root = os.path.dirname(os.getcwd())
+    calibration_data = data.split_and_preprocess_calibration(os.getcwd() + "/dataset", n_samples = 100, size = (image_size, image_size)) 
     calibration_data = np.transpose(calibration_data, (0, 3, 1, 2))
     checkpoint = torch.load(os.getcwd() + f'/ml/models/resnet{image_size}_best.pth')
     net.load_state_dict(checkpoint)
