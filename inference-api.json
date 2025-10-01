@@ -17,14 +17,7 @@
             }
           },
           "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PostKey"
-                }
-              }
-            }
+            "description": "OK"
           },
           "default": {
             "$ref": "#/components/responses/DEFAULT_ERROR"
