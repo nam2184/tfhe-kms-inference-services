@@ -111,7 +111,7 @@ class Client(MethodView):
             client_keys_dir = os.path.join(base_dir, f"keys{chat_id}.bin")
             
             client = FHEModelClient(base_dir)
-            client.generate_private_and_evaluation_keys()
+            client.generate_private_and_evaluation_keys(True)
             print("[INFO] Generated private and evaluation keys")
             client.client.keys.save(client_keys_dir)
             print("[INFO] Re-created FHEModelClient for fresh keys")
@@ -268,7 +268,7 @@ def setup_he_module():
     checkpoint = torch.load(os.getcwd() + f'/ml/models/resnet{image_size}_best.pth')
     net.load_state_dict(checkpoint)
     print("Compiling model for deployment")
-    q_module = compile_brevitas_qat_model(net, calibration_data, rounding_threshold_bits=4, p_error=0.01)        
+    q_module = compile_brevitas_qat_model(net, calibration_data, n_bits=3, rounding_threshold_bits=4, p_error=0.01)        
 
 
 if __name__ == '__main__':
