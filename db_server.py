@@ -24,7 +24,13 @@ class HomomorphicDBService:
         with Session(self.engine) as session:
             stmt = select(HomomorphicKeyModel).where(HomomorphicKeyModel.chat_id == chat_id)
             return session.exec(stmt).first()
-
+    
+    def homomorphic_key_exists(self, chat_id: int) -> bool:
+        with Session(self.engine) as session:
+            stmt = select(HomomorphicKeyModel.id).where(HomomorphicKeyModel.chat_id == chat_id)
+            result = session.exec(stmt).first()
+            return result is not None
+    
     def delete_homomorphic_key_by_chat_id(self, chat_id: int) -> bool:
         with Session(self.engine) as session:
             stmt = select(HomomorphicKeyModel).where(HomomorphicKeyModel.chat_id == chat_id)

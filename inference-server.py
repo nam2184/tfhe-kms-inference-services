@@ -83,7 +83,7 @@ def generate_server_configs(network : Network):
 class Key(MethodView):
     @blp.doc(description="Post up keys for the user")
     @blp.arguments(PostKeyBodySchema)
-    @blp.response(200, PostKeySchema)
+    @blp.response(200)
     @blp.alt_response(status_code=400, schema=ErrorTypeSchema)
     def post(self, data):
         encoded_file = data["file"]
@@ -92,16 +92,17 @@ class Key(MethodView):
         except Exception:
             return jsonify({'status': 'error', 'message': "Invalid base64"}), 400
         
-        key = HomomorphicDBService().get_homomorphic_key_by_chat_id(data["chat_id"])
-        if key is not None :
-            return key
+        exists = HomomorphicDBService().homomorphic_key_exists(data["chat_id"])
+        if exists:
+            return "", 200
 
         key_record = HomomorphicKeyModel(
             file=encoded_file,
             chat_id=data["chat_id"]
         )
         key = HomomorphicDBService().insert_homomorphic_key(key_record)
-        return key   
+        
+        return "", 200
 
 @cross_origin(supports_credentials=True) 
 @blp.route('/key/<int:chat_id>')
@@ -110,7 +111,7 @@ class KeyCheck(MethodView):
     @blp.response(200, PostKeySchema)
     @blp.alt_response(status_code=400, schema=ErrorTypeSchema)
     def get(self, chat_id):
-        key = HomomorphicDBService().get_homomorphic_key_by_chat_id(chat_id)
+        key = HomomorphicDBService().homomorphic_key_exists(chat_id)
         if not key:
             return jsonify({'status': 'error', 'message': "No key found"}), 400
         return key
