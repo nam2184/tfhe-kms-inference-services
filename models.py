@@ -56,7 +56,7 @@ class EncryptedBodyMessageSchema(ma.Schema):
     sender_id = ma.fields.Int(required=True)
     sender_name = ma.fields.Str(required=True)
     receiver_id = ma.fields.Int(required=True)
-    content = ma.fields.Str(required=True)
+    content = ma.fields.Str(required=False)
     image = ma.fields.Str(required=False)
     iv = ma.fields.Str(required=False)
     image_to_classify = ma.fields.Str(required=False)
