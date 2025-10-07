@@ -259,7 +259,7 @@ def run_flask_app(app, port):
 
 def setup_he_module():
     global q_module
-    image_size = 48
+    image_size = 24
     net = resnet.LiteResNet(n_classes=2, in_channels=3)
 
     #project_root = os.path.dirname(os.getcwd())
