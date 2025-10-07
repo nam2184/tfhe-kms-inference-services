@@ -108,13 +108,13 @@ class Key(MethodView):
 @blp.route('/key/<int:chat_id>')
 class KeyCheck(MethodView):
     @blp.doc(description="Check for keys")
-    @blp.response(200, PostKeySchema)
+    @blp.response(200)
     @blp.alt_response(status_code=400, schema=ErrorTypeSchema)
     def get(self, chat_id):
         key = HomomorphicDBService().homomorphic_key_exists(chat_id)
         if not key:
             return jsonify({'status': 'error', 'message': "No key found"}), 400
-        return key
+        return "", 200
 
 @cross_origin(supports_credentials=True) 
 @blp.route('/predict')

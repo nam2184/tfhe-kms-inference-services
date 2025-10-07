@@ -53,14 +53,7 @@
             }
           },
           "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PostKey"
-                }
-              }
-            }
+            "description": "OK"
           },
           "default": {
             "$ref": "#/components/responses/DEFAULT_ERROR"
@@ -225,26 +218,6 @@
         "required": [
           "message",
           "section"
-        ],
-        "additionalProperties": false
-      },
-      "PostKey": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "file": {
-            "type": "string"
-          },
-          "chat_id": {
-            "type": "integer"
-          }
-        },
-        "required": [
-          "chat_id",
-          "file",
-          "id"
         ],
         "additionalProperties": false
       },
