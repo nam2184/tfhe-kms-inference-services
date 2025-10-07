@@ -6,8 +6,10 @@ from concrete.fhe.compilation.artifacts import shutil
 from flask import Flask, json, request, jsonify, send_file, Response
 import os
 from flask_wtf.csrf import logging
+from numpy.core.fromnumeric import size
 from werkzeug.wrappers import response
 from db_kms import KeysDBService, KeyModel, ClientHEModel
+from ml.ml import CNN
 import util
 from network import Network
 from concrete.ml.torch.compile import compile_brevitas_qat_model, compile_torch_model, tempfile, torch
@@ -259,12 +261,14 @@ def run_flask_app(app, port):
 
 def setup_he_module():
     global q_module
-    image_size = 20
+    image_size = 15
     net = resnet.LiteResNet(n_classes=2, in_channels=3)
+    #net = CNN(n_classes=2, in_channels=3, image_size=image_size)
 
     #project_root = os.path.dirname(os.getcwd())
-    calibration_data = data.split_and_preprocess_calibration(os.getcwd() + "/dataset", n_samples = 100, size = (image_size, image_size)) 
+    calibration_data = data.split_and_preprocess_calibration(os.getcwd() + "/dataset", n_samples = 10, size = (image_size, image_size)) 
     calibration_data = np.transpose(calibration_data, (0, 3, 1, 2))
+    #net.forward(torch.from_numpy(calibration_data))
     checkpoint = torch.load(os.getcwd() + f'/ml/models/resnet{image_size}_best.pth')
     net.load_state_dict(checkpoint)
     print("Compiling model for deployment")

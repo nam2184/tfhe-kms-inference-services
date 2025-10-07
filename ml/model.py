@@ -218,10 +218,21 @@ train_and_save_resnet(
     base_path=dataset_root + "/dataset",
     save_dir="models",
     n_classes=2,   # neutral vs other
-    size=20,
+    size=15,
     epochs=30,
     batch_size=32,
     lr=1e-3
 )
+
+train_and_save(
+    base_path=dataset_root + "/dataset",
+    save_dir="models",
+    n_classes=2,   # neutral vs other
+    size=15,
+    epochs=30,
+    batch_size=32,
+    lr=1e-3
+)
+
 
 
