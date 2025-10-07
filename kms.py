@@ -262,14 +262,14 @@ def run_flask_app(app, port):
 def setup_he_module():
     global q_module
     image_size = 15
-    net = resnet.LiteResNet(n_classes=2, in_channels=3)
-    #net = CNN(n_classes=2, in_channels=3, image_size=image_size)
+    #net = resnet.LiteResNet(n_classes=2, in_channels=3)
+    net = CNN(n_classes=2, in_channels=3, image_size=image_size)
 
     #project_root = os.path.dirname(os.getcwd())
     calibration_data = data.split_and_preprocess_calibration(os.getcwd() + "/dataset", n_samples = 10, size = (image_size, image_size)) 
     calibration_data = np.transpose(calibration_data, (0, 3, 1, 2))
-    #net.forward(torch.from_numpy(calibration_data))
-    checkpoint = torch.load(os.getcwd() + f'/ml/models/resnet{image_size}_best.pth')
+    net.forward(torch.from_numpy(calibration_data))
+    checkpoint = torch.load(os.getcwd() + f'/ml/models/cnn{image_size}_best.pth')
     net.load_state_dict(checkpoint)
     print("Compiling model for deployment")
     q_module = compile_brevitas_qat_model(net, calibration_data, n_bits=3, rounding_threshold_bits=4, p_error=0.01)        

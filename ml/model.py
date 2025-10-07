@@ -37,7 +37,7 @@ def train_and_save(
     val_loader = DataLoader(val_ds, batch_size=batch_size, shuffle=False)
 
     # === Model, optimizer, loss ===
-    model = ml.CNN(n_classes, 1, size).to(device)
+    model = ml.CNN(n_classes, 3, size).to(device)
     optimizer = optim.Adam(model.parameters(), lr=lr)
     criterion = nn.CrossEntropyLoss()
 
@@ -214,16 +214,6 @@ def train_and_save_resnet(
 
 project_root = os.path.dirname(os.getcwd())
 dataset_root = os.path.dirname(project_root)
-train_and_save_resnet(
-    base_path=dataset_root + "/dataset",
-    save_dir="models",
-    n_classes=2,   # neutral vs other
-    size=15,
-    epochs=30,
-    batch_size=32,
-    lr=1e-3
-)
-
 train_and_save(
     base_path=dataset_root + "/dataset",
     save_dir="models",
