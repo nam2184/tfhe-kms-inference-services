@@ -145,7 +145,8 @@ class Predict(MethodView):
             else:
                 return "", 204
         except Exception as e:
-            return jsonify({'status': 'error', 'message': str(e)}), 400
+            print(f"[ERROR] Exception in /predict endpoint: {e}")
+            return jsonify({'section': 'predict', 'message': str(e)}), 400
 
 # --- Register endpoints ---
 api.register_blueprint(blp)
