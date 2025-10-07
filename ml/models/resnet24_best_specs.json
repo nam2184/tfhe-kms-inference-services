@@ -5,8 +5,8 @@
     24,
     24
   ],
-  "epochs_trained": 7,
+  "epochs_trained": 25,
   "batch_size": 32,
   "learning_rate": 0.001,
-  "best_val_acc": 0.8291071428571428
+  "best_val_acc": 0.8238027162258756
 }

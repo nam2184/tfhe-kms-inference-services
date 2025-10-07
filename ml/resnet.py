@@ -83,7 +83,7 @@ class LiteResNet(nn.Module):
         spatial_size = spatial_size // 2  # layer3 stride=2
         spatial_size = spatial_size // 2  # layer4 stride=2
         print(spatial_size)
-        self.avgpool = nn.AvgPool2d(kernel_size=spatial_size, stride=spatial_size)
+        self.avgpool = nn.AvgPool2d(kernel_size=2, stride=2)
         self.quant_out = qnn.QuantIdentity(bit_width=N_BITS, act_quant=Int8ActPerTensorFloat)
 
         self.fc = qnn.QuantLinear(
