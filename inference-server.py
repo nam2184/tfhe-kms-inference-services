@@ -116,7 +116,7 @@ class KeyCheck(MethodView):
             return jsonify({'status': 'error', 'message': "No key found"}), 400
         return "", 200
 
-@cross_origin(supports_credentials=True) 
+@cross_origin(supports_credentials=True)
 @blp.route('/predict')
 class Predict(MethodView):
     @blp.doc(description="Predict classification nsfw")
@@ -125,27 +125,39 @@ class Predict(MethodView):
     @blp.alt_response(status_code=204)
     @blp.alt_response(status_code=400, schema=ErrorTypeSchema)
     def post(self, data):
-        # --- Fetch key from DB ---
-        try :
-            key = HomomorphicDBService().get_homomorphic_key_by_chat_id(data["chat_id"])
-            if key is not None :
-                serialized_evaluation_keys = base64.b64decode(key.file)
-                image_to_classify = base64.b64decode(data["image_to_classify"])
-                time_begin = time.time()
-                encrypted_prediction = FHEModelServer(network.server_dir.name).run(
-                    image_to_classify, serialized_evaluation_keys
-                )
-                time_end = time.time()
-                print(f"Time take : {time_end - time_begin} seconds")
-                encoded_str = base64.b64encode(encrypted_prediction).decode("utf-8")
-                data["classification_result"] = encoded_str
-                with open(network.server_dir.name + "/encrypted_prediction.enc", "wb") as f:
-                    f.write(encrypted_prediction)
-                return data, 200
-            else:
+        try:
+            chat_id = data.get("chat_id")
+            print(f"[INFO] /predict called for chat_id={chat_id}")
+            key_service = HomomorphicDBService()
+            key = key_service.get_homomorphic_key_by_chat_id(chat_id)
+            
+            if key is None:
+                print(f"[WARN] No homomorphic key found for chat_id={chat_id}")
                 return "", 204
+
+            print(f"[INFO] Homomorphic key retrieved, size={len(key.file)} bytes")
+            serialized_evaluation_keys = base64.b64decode(key.file)
+
+            image_to_classify_b64 = data.get("image_to_classify", "")
+            print(f"[INFO] Received image_to_classify, size={len(image_to_classify_b64)} bytes")
+            image_to_classify = base64.b64decode(image_to_classify_b64)
+
+            time_begin = time.time()
+            print(f"[INFO] Starting FHE prediction for chat_id={chat_id}")
+            encrypted_prediction = FHEModelServer(network.server_dir.name).run(
+                image_to_classify, serialized_evaluation_keys
+            )
+            time_end = time.time()
+            print(f"[INFO] Finished FHE prediction for chat_id={chat_id} "
+                  f"(duration={time_end - time_begin:.3f} seconds, "
+                  f"encrypted output size={len(encrypted_prediction)} bytes)")
+
+            encoded_str = base64.b64encode(encrypted_prediction).decode("utf-8")
+            data["classification_result"] = encoded_str
+            return data, 200
+
         except Exception as e:
-            print(f"[ERROR] Exception in /predict endpoint: {e}")
+            print(f"[ERROR] Exception in /predict endpoint for chat_id={data.get('chat_id')}: {e}")
             return jsonify({'section': 'predict', 'message': str(e)}), 400
 
 # --- Register endpoints ---
