@@ -113,7 +113,7 @@ class KeyCheck(MethodView):
     def get(self, chat_id):
         key = HomomorphicDBService().homomorphic_key_exists(chat_id)
         if not key:
-            return jsonify({'status': 'error', 'message': "No key found"}), 400
+            return jsonify({'section': 'error', 'message': "No key found"}), 400
         return "", 200
 
 @cross_origin(supports_credentials=True)
