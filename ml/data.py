@@ -156,7 +156,7 @@ def split_dataset_xy(base_path, train_ratio=0.8, seed=42, sample=False):
         if not os.path.isdir(class_path):
             continue
 
-        label = 0 if class_name.lower() == "neutral" or class_name.lower() == "drawing" else 1
+        label = 0 if class_name.lower() == "neutral" or class_name.lower() == "drawings" else 1
         images = [os.path.join(class_path, f) 
                   for f in os.listdir(class_path) 
                   if f.lower().endswith((".jpg", ".png"))]
@@ -186,7 +186,7 @@ def make_small_dataset(base_path, n_samples=1000, seed=42):
             continue
 
         # Label rule: 0 for "neutral"/"drawing", 1 for everything else
-        label = 0 if class_name.lower() in ["neutral", "drawing"] else 1
+        label = 0 if class_name.lower() in ["neutral", "drawings"] else 1
         images = [
             os.path.join(class_path, f)
             for f in os.listdir(class_path)
