@@ -274,7 +274,6 @@ def setup_he_module():
     print("Compiling model for deployment")
     q_module = compile_brevitas_qat_model(net, calibration_data, n_bits=3, rounding_threshold_bits=4, p_error=0.01)        
 
-
 if __name__ == '__main__':
     save_openapi_spec(app)
     setup_he_module()    

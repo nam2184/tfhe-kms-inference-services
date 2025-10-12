@@ -159,6 +159,9 @@ def train_and_save_resnet_cnn(
             optimizer.zero_grad()
 
             features = backbone(xb)              # ResNet feature extractor
+            features_min = features.min()
+            features_max = features.max()
+            features = (features - features_min) / (features_max - features_min + 1e-8)
             outputs = classifier(features)       # CNN classifier
 
             loss = criterion(outputs, yb)
@@ -181,6 +184,10 @@ def train_and_save_resnet_cnn(
             for xb, yb in val_loader:
                 xb, yb = xb.to(device), yb.to(device)
                 features = backbone(xb)
+                # normalize to 0–1 range
+                features_min = features.min()
+                features_max = features.max()
+                features = (features - features_min) / (features_max - features_min + 1e-8)
                 outputs = classifier(features)
                 loss = criterion(outputs, yb)
                 val_loss += loss.item() * xb.size(0)
