@@ -1,9 +1,9 @@
 {
   "n_classes": 2,
   "backbone_target_channels": 3,
-  "backbone_target_size": 16,
-  "epochs_trained": 27,
+  "backbone_target_size": 28,
+  "epochs_trained": 8,
   "batch_size": 32,
   "learning_rate": 0.001,
-  "best_val_acc": 0.8354181558255898
+  "best_val_acc": 0.8366690493209435
 }

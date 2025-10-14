@@ -141,8 +141,9 @@ def train_and_save_resnet_cnn(
     val_loader = DataLoader(TensorDataset(x_val, y_val), batch_size=batch_size, shuffle=False)
 
     # === Model setup ===
-    backbone = ResNet18(target_channels=3, target_size=16).to(device)  # outputs (B,3,16,16)
-    classifier = ml.CNN2(n_classes=n_classes, in_channels=3, image_size=16).to(device)  # consumes ResNet features
+    backbone = ResNet18(target_channels=3, target_size=28).to(device)  # outputs (B,3,16,16)
+
+    classifier = ml.CNN(n_classes=n_classes, in_channels=3, image_size=28).to(device)  # consumes ResNet features
 
     # Combine parameters for joint optimization
     optimizer = optim.Adam(list(backbone.parameters()) + list(classifier.parameters()), lr=lr)
@@ -154,7 +155,7 @@ def train_and_save_resnet_cnn(
     for epoch in range(epochs):
         backbone.train()
         classifier.train()
-        running_loss, correct, total = 0.0, 0, 0
+        running_loss, correct, total = -1.0, 0, 0
 
         for xb, yb in tqdm(train_loader, desc=f"Epoch {epoch+1}/{epochs} [Train]"):
             xb, yb = xb.to(device), yb.to(device)
@@ -221,7 +222,7 @@ def train_and_save_resnet_cnn(
             specs = {
                 "n_classes": n_classes,
                 "backbone_target_channels": 3,
-                "backbone_target_size": 16,
+                "backbone_target_size": 28,
                 "epochs_trained": epoch + 1,
                 "batch_size": batch_size,
                 "learning_rate": lr,

@@ -9,7 +9,7 @@ from flask_wtf.csrf import logging
 from numpy.core.fromnumeric import size
 from werkzeug.wrappers import response
 from db_kms import KeysDBService, KeyModel, ClientHEModel
-from ml.ml import CNN, CNN2
+from ml.ml import CNN
 import util
 from network import Network
 from concrete.ml.torch.compile import compile_brevitas_qat_model, compile_torch_model, tempfile, torch
@@ -261,9 +261,9 @@ def run_flask_app(app, port):
 
 def setup_he_module():
     global q_module
-    image_size = 16
+    image_size = 28   
     #net = resnet.LiteResNet(n_classes=2, in_channels=3)
-    net = CNN2(n_classes=2, in_channels=3, image_size=image_size)
+    net = CNN(n_classes=2, in_channels=3, image_size=image_size)
 
     #project_root = os.path.dirname(os.getcwd())
     calibration_data = data.split_and_preprocess_calibration(os.getcwd() + "/dataset", n_samples = 10, size = (image_size, image_size)) 
