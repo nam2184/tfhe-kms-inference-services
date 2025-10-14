@@ -261,7 +261,7 @@ def run_flask_app(app, port):
 
 def setup_he_module():
     global q_module
-    image_size = 15
+    image_size = 16
     #net = resnet.LiteResNet(n_classes=2, in_channels=3)
     net = CNN2(n_classes=2, in_channels=3, image_size=image_size)
 
