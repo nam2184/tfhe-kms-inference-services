@@ -84,4 +84,86 @@ class CNN(nn.Module):
         x = self.fc1(x)
         return x
 
+class CNN2(nn.Module):
+    """Quantized CNN with 2 convolutional passes before FC layer."""
 
+    def __init__(self, n_classes, in_channels=1, image_size=None):
+        super().__init__()
+
+        qconv_args = {
+            "weight_bit_width": N_BITS,
+            "weight_quant": Int8WeightPerTensorFloat,
+            "bias": True,
+            "bias_quant": None,
+            "narrow_range": True
+        }
+
+        qlinear_args = {
+            "weight_bit_width": N_BITS,
+            "weight_quant": Int8WeightPerTensorFloat,
+            "bias": True,
+            "bias_quant": None,
+            "narrow_range": True
+        }
+
+        qidentity_args = {
+            "bit_width": N_BITS,
+            "act_quant": Int8ActPerTensorFloat
+        }
+
+        # Input quantization
+        self.quant_inp = qnn.QuantIdentity(**qidentity_args)
+
+        # === First conv block ===
+        self.conv1 = qnn.QuantConv2d(in_channels, 8, kernel_size=3, stride=1, padding=1, **qconv_args)
+        self.bn1 = nn.BatchNorm2d(8)
+        self.relu1 = qnn.QuantReLU(bit_width=N_BITS)
+        self.pool1 = nn.AvgPool2d(kernel_size=2, stride=2)
+        self.dropout1 = nn.Dropout(p=0.5)
+
+        # === Second conv block ===
+        self.conv2 = qnn.QuantConv2d(8, 16, kernel_size=3, stride=1, padding=1, **qconv_args)
+        self.bn2 = nn.BatchNorm2d(16)
+        self.relu2 = qnn.QuantReLU(bit_width=N_BITS)
+        self.pool2 = nn.AvgPool2d(kernel_size=2, stride=2)
+        self.dropout2 = nn.Dropout(p=0.5)
+
+        # Quant before FC
+        self.quant_before_fc = qnn.QuantIdentity(**qidentity_args)
+
+        # FC layer will be lazily built
+        self.fc1 = None
+        self.n_classes = n_classes
+        self.qlinear_args = qlinear_args
+        self.image_size = image_size
+
+    def _build_fc(self, x):
+        in_features = x.numel() // x.size(0)
+        self.fc1 = qnn.QuantLinear(in_features, self.n_classes, **self.qlinear_args).to(x.device)
+
+    def forward(self, x):
+        x = self.quant_inp(x)
+
+        # === First conv block ===
+        x = self.conv1(x)
+        x = self.bn1(x)
+        x = self.relu1(x)
+        x = self.pool1(x)
+        x = self.dropout1(x)
+
+        # === Second conv block ===
+        x = self.conv2(x)
+        x = self.bn2(x)
+        x = self.relu2(x)
+        x = self.pool2(x)
+        x = self.dropout2(x)
+
+        # === Fully connected ===
+        x = self.quant_before_fc(x)
+        x = x.flatten(1)
+
+        if self.fc1 is None:
+            self._build_fc(x)
+
+        x = self.fc1(x)
+        return x

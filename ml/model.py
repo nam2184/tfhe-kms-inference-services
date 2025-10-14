@@ -44,7 +44,7 @@ def train_and_save(
 
     # === Training loop ===
     print("Starting training")
-    best_val_acc = 0.0
+    best_acc = 0.0
 
     for epoch in range(epochs):
         model.train()
@@ -88,9 +88,10 @@ def train_and_save(
               f"Train Loss: {train_loss:.4f}, Train Acc: {train_acc:.4f} "
               f"Val Loss: {val_loss:.4f}, Val Acc: {val_acc:.4f}")
 
+        average_acc = (val_acc + train_acc) / 2
         # === Save best model ===
-        if val_acc > best_val_acc:
-            best_val_acc = val_acc
+        if  average_acc > best_acc:
+            best_acc = average_acc
 
             os.makedirs(save_dir, exist_ok=True)
             model_path = os.path.join(save_dir, f"cnn{size}_best.pth")
@@ -104,12 +105,13 @@ def train_and_save(
                 "epochs_trained": epoch + 1,
                 "batch_size": batch_size,
                 "learning_rate": lr,
-                "best_val_acc": best_val_acc,
+                "best_val_acc": best_acc,
+                
             }
             with open(spec_path, "w") as f:
                 json.dump(specs, f, indent=2)
 
-            print(f"New best model saved (Val Acc: {best_val_acc:.4f}) to {model_path}")
+            print(f"New best model saved (Val Acc: {best_acc:.4f}) to {model_path}")
 
 def train_and_save_resnet_cnn(
     base_path,
@@ -139,14 +141,14 @@ def train_and_save_resnet_cnn(
     val_loader = DataLoader(TensorDataset(x_val, y_val), batch_size=batch_size, shuffle=False)
 
     # === Model setup ===
-    backbone = ResNet18(target_channels=3, target_size=15).to(device)  # outputs (B,3,15,15)
-    classifier = ml.CNN(n_classes=n_classes, in_channels=3, image_size=15).to(device)  # consumes ResNet features
+    backbone = ResNet18(target_channels=3, target_size=16).to(device)  # outputs (B,3,16,16)
+    classifier = ml.CNN2(n_classes=n_classes, in_channels=3, image_size=16).to(device)  # consumes ResNet features
 
     # Combine parameters for joint optimization
     optimizer = optim.Adam(list(backbone.parameters()) + list(classifier.parameters()), lr=lr)
     criterion = nn.CrossEntropyLoss()
 
-    best_val_acc = 0.0
+    best_acc = 0.0
     print("Starting training...")
 
     for epoch in range(epochs):
@@ -203,8 +205,9 @@ def train_and_save_resnet_cnn(
               f"Val Loss: {val_loss:.4f}, Val Acc: {val_acc:.4f}")
 
         # === Save best model ===
-        if val_acc > best_val_acc:
-            best_val_acc = val_acc
+        if  val_acc > best_acc:
+            best_acc = val_acc
+
             os.makedirs(save_dir, exist_ok=True)
 
             model_path = os.path.join(save_dir, f"resnet_cnn_best.pth")
@@ -218,23 +221,23 @@ def train_and_save_resnet_cnn(
             specs = {
                 "n_classes": n_classes,
                 "backbone_target_channels": 3,
-                "backbone_target_size": 15,
+                "backbone_target_size": 16,
                 "epochs_trained": epoch + 1,
                 "batch_size": batch_size,
                 "learning_rate": lr,
-                "best_val_acc": best_val_acc,
+                "best_val_acc": best_acc,
             }
             with open(spec_path, "w") as f:
                 json.dump(specs, f, indent=2)
 
-            print(f"New best model saved (Val Acc: {best_val_acc:.4f}) to {model_path}")
+            print(f"New best model saved (Val Acc: {best_acc:.4f}) to {model_path}")
 
 
 if __name__ == "__main__":
     base_path = os.path.dirname(os.path.dirname(os.getcwd()))       # path to your dataset
     save_dir = "models"
     n_classes = 2
-    epochs = 20
+    epochs = 30
     input_size = 64               # or None for adaptive input
     batch_size = 32
     lr = 1e-3
