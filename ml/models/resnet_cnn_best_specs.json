@@ -1,7 +1,7 @@
 {
   "n_classes": 2,
   "backbone_target_channels": 3,
-  "backbone_target_size": 28,
+  "backbone_target_size": 16,
   "epochs_trained": 9,
   "batch_size": 32,
   "learning_rate": 0.001,
