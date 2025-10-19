@@ -142,7 +142,6 @@ def train_and_save_resnet_cnn(
 
     # === Model setup ===
     backbone = ResNet18(target_channels=3, target_size=16).to(device)  # outputs (B,3,16,16)
-
     classifier = ml.CNN(n_classes=n_classes, in_channels=3, image_size=16).to(device)  # consumes ResNet features
 
     # Combine parameters for joint optimization

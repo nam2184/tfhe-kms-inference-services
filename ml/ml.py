@@ -12,7 +12,7 @@ from brevitas.quant import Int8ActPerTensorFloat, Int8WeightPerTensorFloat
 
 # Define the number of bits for quantization
 # Increased from 3 to 4 bits for better accuracy while still considering FHE constraints
-N_BITS = 4
+N_BITS = 3
 N_BITS_LATER = 4
 
 class CNN(nn.Module):
