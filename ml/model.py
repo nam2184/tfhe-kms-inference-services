@@ -221,7 +221,7 @@ def train_and_save_resnet_cnn(
             specs = {
                 "n_classes": n_classes,
                 "backbone_target_channels": 3,
-                "backbone_target_size": 28,
+                "backbone_target_size": 16,
                 "epochs_trained": epoch + 1,
                 "batch_size": batch_size,
                 "learning_rate": lr,
