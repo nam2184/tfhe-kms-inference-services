@@ -269,7 +269,7 @@ def setup_he_module():
     calibration_data = data.split_and_preprocess_calibration(os.getcwd() + "/dataset", n_samples = 10, size = (image_size, image_size)) 
     calibration_data = np.transpose(calibration_data, (0, 3, 1, 2))
     net.forward(torch.from_numpy(calibration_data))
-    checkpoint = torch.load(os.getcwd() + f'/ml/models/resnet_cnn_best.pth')
+    checkpoint = torch.load(os.getcwd() + f'/ml/models/resnet_cnn_best4bits.pth')
     net.load_state_dict(checkpoint["classifier_state_dict"])
     print("Compiling model for deployment")
     q_module = compile_brevitas_qat_model(net, calibration_data, n_bits=3, rounding_threshold_bits=4, p_error=0.01)        
