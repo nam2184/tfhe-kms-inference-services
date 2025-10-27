@@ -29,7 +29,10 @@ Each service runs as an independent Flask API with automatic OpenAPI documentati
 -  **Thread-safe multiprocessing Flask runner**
 
 ## Instructions
-
+Install packages
+```
+  pip install requirements.txt
+```
 To run the services
 ```
    python3 <service>.py
