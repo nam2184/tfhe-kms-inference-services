@@ -118,7 +118,7 @@ def train_and_save_resnet_cnn(
     save_dir="model_out",
     n_classes=2,
     epochs=10,
-    input_size=None,       # optional, can be None for adaptive ResNet
+    input_size=None,       
     batch_size=32,
     lr=1e-3,
     device=None,
@@ -231,40 +231,6 @@ def train_and_save_resnet_cnn(
                 json.dump(specs, f, indent=2)
 
             print(f"New best model saved (Val Acc: {best_acc:.4f}) to {model_path}")
-
-
-def quantize_resnet_features_uint(features: torch.Tensor, bits: int = 3) -> torch.Tensor:
-    """
-    Quantize ResNet feature maps (range [-255, 255]) to unsigned integers (uint8 or uint16)
-    for FHE-friendly inference — avoids negative values entirely.
-
-    Args:
-        features (torch.Tensor): Input feature tensor, expected range [-255, 255].
-        bits (int): Bit width of output integers (8 or 16).
-
-    Returns:
-        torch.Tensor: Quantized tensor in torch.uint8 or torch.uint16.
-    """
-    if bits == 8:
-        dtype = torch.uint8
-        qmax = 255
-    elif bits == 16:
-        dtype = torch.uint16
-        qmax = 65535
-    else:
-        raise ValueError("Only 8-bit or 16-bit quantization supported.")
-
-    # 1. Clamp features to valid float range
-    features = torch.clamp(features, -255.0, 255.0)
-
-    # 2. Shift from [-255, 255] → [0, 510]
-    shifted = features + 255.0
-
-    # 3. Scale down to [0, qmax] and round
-    quantized = (shifted * (qmax / 510.0)).round().clamp(0, qmax)
-
-    # 4. Cast to unsigned integer type
-    return quantized.to(dtype)
 
 if __name__ == "__main__":
     base_path = os.path.dirname(os.path.dirname(os.getcwd()))       # path to your dataset

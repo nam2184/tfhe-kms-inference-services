@@ -1,4 +1,5 @@
-from flask_wtf.csrf import os
+import os
+import random
 import numpy as np
 import torch
 from torch.utils.data import DataLoader, TensorDataset
@@ -8,92 +9,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image
 import cv2
-
-def quantize_input(input_data, num_bits=8):
-    """Quantize input data to a fixed number of bits."""
-    min_val, max_val = np.min(input_data), np.max(input_data)
-    scale = (2 ** num_bits - 1) / (max_val - min_val)
-    quantized_data = np.round((input_data - min_val) * scale).astype(np.uint8)
-    return quantized_data
-
-class Dataset:
-    def __init__(self, x, y, quantize=True):
-        self.quantize = quantize
-        if self.quantize:
-            self.x_data = quantize_input(x)
-        else:
-            self.x_data = x
-        self.y_data = y
-        self.dataset = TensorDataset(torch.Tensor(self.x_data), torch.Tensor(self.y_data))
-
-    def load_data(self, batch_size=32):
-        return DataLoader(self.dataset, batch_size=batch_size, shuffle=True)
-
-def test_dataset():
-    X, y = load_digits(return_X_y=True)
-    X = np.expand_dims(X.reshape((-1, 8, 8)), 1)
-
-    nplot = 4
-    fig, ax = plt.subplots(nplot, nplot, figsize=(6, 6))
-    for i in range(nplot):
-        for j in range(nplot):
-            ax[i, j].imshow(X[i * nplot + j, ::].squeeze())
-
-    x_train, x_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.25, shuffle=True, random_state=42
-    )
-
-    print(y)
-    return x_train, x_test, y_train, y_test
-
-def load_mnist_png_dataset(data_dir, size):
-    X = []
-    y = []
-
-    for label in range(0, 10):
-        label_dir = os.path.join(data_dir, str(label))
-        for img_file in os.listdir(label_dir):
-            img_path = os.path.join(label_dir, img_file)
-            img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
-            if size == 8:
-                img_resized = cv2.resize(img, (8, 8))
-            else :
-                img_resized = cv2.resize(img, (size, size))
-            X.append(img_resized)
-            y.append(label)  # Subtract 1 to make labels 0-based
-
-    X = np.array(X)
-    X = X.astype('float32') / 255.0
-    X = np.expand_dims(X, axis=1)  # Add channel dimension (similar to test_dataset)
-    
-    y = np.array(y)
-    return X, y
-
-def test_dataset_png(data_dir, size):
-    X, y = load_mnist_png_dataset(data_dir, size)
-    
-    x_train, x_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.15, shuffle=True, random_state=42
-    )
-    return x_train, x_test, y_train, y_test
-
-
-from PIL import Image
-import numpy as np
-import os
-import random
-
-def preprocess_image(image):
-    image = image.resize((8, 8))  # Resize image to 8x8
-    image = image.convert('L')     # Convert to grayscale
-    image_array = np.array(image)
-    
-    image_array = image_array.astype(np.uint16)        # Convert to uint16 (simulate uint9)
-    image_array = np.bitwise_and(image_array, 0x1FF)  # Mask the values to 9 bits
-    
-    image_array = np.expand_dims(image_array.reshape((1, 8, 8)), axis=0)  # Shape: (1, 1, 8, 8)
-    
-    return image_array
 
 def split_dataset(base_path, train_ratio=0.8, seed=42):
     """
@@ -112,7 +27,6 @@ def split_dataset(base_path, train_ratio=0.8, seed=42):
     random.seed(seed)
     train_set = []
     test_set = []
-
     for class_name in os.listdir(base_path):
         class_path = os.path.join(base_path, class_name)
         if not os.path.isdir(class_path):
@@ -132,6 +46,7 @@ def split_dataset(base_path, train_ratio=0.8, seed=42):
             test_set.append((img_array, label))
 
     return train_set, test_set
+
 def test_nsfw_dataset(data_dir):
     # Get train/test sets as tuples
     train_set, test_set = split_dataset(data_dir)
@@ -161,7 +76,6 @@ def split_dataset_xy(base_path, train_ratio=0.8, seed=42, sample=False):
                   for f in os.listdir(class_path) 
                   if f.lower().endswith((".jpg", ".png"))]
         random.shuffle(images)
-
         split_idx = int(len(images) * train_ratio)
         x_train.extend(images[:split_idx])
         y_train.extend([label] * split_idx)
@@ -257,7 +171,6 @@ def split_and_preprocess_calibration(base_path, n_samples=100, seed=42, size=(8,
     """
     calibration_data, calibration_y = make_small_dataset(base_path=base_path, n_samples=n_samples, seed=seed)
     calibration_data = preprocess_images_color(calibration_data, size)
-    print("calibration data shape:", calibration_data)
     return calibration_data
 
 #https://huggingface.co/datasets/deepghs/nsfw_detect

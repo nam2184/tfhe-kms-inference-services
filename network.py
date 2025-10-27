@@ -1,31 +1,26 @@
 import time
 import requests
 import os
+from dotenv import load_dotenv
 
-headers = {
-    'Content-Type': 'application/json; charset=utf-8'
-}
-
-LOCAL_SERVER_ENDPOINT = "http://127.0.0.1:5000"
-REMOTE_SERVER_ENDPOINT = "https://khanhmychattykms.win"
-
-# Define the cookies to be sent (like session or auth tokens)
-cookies = {
-    'session_id': 'your_session_id'  # Replace with actual session cookie
-}
+load_dotenv()
 
 class Dir:
-    def __init__(self, name):
-        self.name = os.getcwd() + name
+    def __init__(self, name: str):
+        self.name = os.path.join(os.getcwd(), name.lstrip("/"))
         if not os.path.exists(self.name):
-            os.makedirs(self.name)
+            os.makedirs(self.name, exist_ok=True)
 
 class Network:
     """Simulate a network on disk."""
 
     def __init__(self):
-        self.dev_dir = Dir("/dev") # pylint: disable=consider-using-with
-        self.server_dir = Dir("/server") # pylint: disable=consider-using-with
-        self.log_dir = Dir("/logs") # pylint: disable=consider-using-with
-        self.local_kms_endpoint = LOCAL_SERVER_ENDPOINT
-        self.remote_kms_endpoint = REMOTE_SERVER_ENDPOINT
+        # Directories for network simulation
+        self.dev_dir = Dir("/dev")
+        self.server_dir = Dir("/server")
+        self.log_dir = Dir("/logs")
+
+        # Endpoints loaded from environment variables
+        self.local_kms_endpoint = os.getenv("LOCAL_SERVER_ENDPOINT", "http://127.0.0.1:5000")
+        self.remote_kms_endpoint = os.getenv("REMOTE_SERVER_ENDPOINT")
+
