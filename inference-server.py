@@ -14,8 +14,11 @@ from flask_cors import CORS, cross_origin
 from flask_smorest import Api, Blueprint
 from flask_smorest.blueprint import MethodView
 
+import torch
+import numpy as np
 from concrete.ml.deployment import FHEModelServer
 from db_server import HomomorphicDBService, HomomorphicKeyModel
+from ml import ml, data
 from models import (
     EncryptedBodyMessageSchema,
     EncryptedMessageSchema,
@@ -34,6 +37,17 @@ class InferenceService:
         self.debug = debug
         self.local = local
         self.network = Network()
+        self.image_size = 16
+        self.net = ml.CNN(n_classes=2, in_channels=3, image_size=self.image_size)
+        
+        calibration_data = data.split_and_preprocess_calibration(
+            os.getcwd() + "/dataset", n_samples=10, size=(self.image_size,self.image_size))
+        calibration_data = np.transpose(calibration_data, (0, 3, 1, 2))
+        self.net.forward(torch.from_numpy(calibration_data))
+
+        checkpoint = torch.load(os.getcwd() + "/ml/models/resnet_cnn_best4bits.pth")
+        self.net.load_state_dict(checkpoint["classifier_state_dict"])
+
 
         self.app = Flask("inference")
         self.app.config.update(
@@ -166,6 +180,14 @@ class InferenceService:
         try:
             chat_id = data.get("chat_id")
             self.logger.info(f"/predict called for chat_id={chat_id}")
+            if data.get("type") == "plain":
+                image_to_classify = base64.b64decode(data.get("image_to_classify", ""))
+                features = np.frombuffer(image_to_classify, dtype=np.float32)                
+                prediction = self.net(features)
+                encoded_prediction = base64.b64encode(prediction).decode("utf-8")
+                data["classification_result"] = encoded_prediction
+                return data, 200
+                
             key_service = HomomorphicDBService()
             key = key_service.get_homomorphic_key_by_chat_id(chat_id)
 
